@@ -14,7 +14,7 @@ export default function Welcome() {
 
   return (
     <LinearGradient
-      colors={["#2E0249", "#570A57", "#A91079"]}
+      colors={["#2D8CFF", "#FF2D55"]}
       style={{
         flex: 1,
         justifyContent: "center",
@@ -32,7 +32,7 @@ export default function Welcome() {
           letterSpacing: 2,
         }}
       >
-        CHATWARDS
+       𝐏𝐢𝐧𝐠𝐖𝐚𝐫𝐝𝐬
       </Text>
 
       {/* Tagline */}
@@ -44,14 +44,14 @@ export default function Welcome() {
           fontSize: 20,
         }}
       >
-        𝒴𝑜𝓊𝓇 𝒫𝑒𝓇𝓈𝑜𝓃𝒶𝓁 𝑅𝑒𝓂𝒾𝓃𝒹𝑒𝓇 𝒜𝓅𝓅 – 𝒮𝓉𝒶𝓎 𝒪𝓇𝑔𝒶𝓃𝒾𝓏𝑒𝒹, 𝒩𝑒𝓋𝑒𝓇 𝑀𝒾𝓈𝓈 𝒶 𝒯𝒶𝓈𝓀.
+        “𝑆𝑚𝑎𝑟𝑡 𝑟𝑒𝑚𝑖𝑛𝑑𝑒𝑟𝑠. 𝑆𝑒𝑎𝑚𝑙𝑒𝑠𝑠 𝑠𝑢𝑝𝑝𝑜𝑟𝑡. 𝑇𝑖𝑚𝑒 𝑤𝑒𝑙𝑙 𝑠𝑝𝑒𝑛𝑡.”
       </Text>
 
       {/* Login Button */}
       <TouchableOpacity
         onPress={() => router.push("/login")}
         style={{
-          backgroundColor: "#9333EA",
+          backgroundColor: "#2D8CFF",
           paddingVertical: 10,
           borderRadius: 5,
           width: "60%",
@@ -60,7 +60,7 @@ export default function Welcome() {
         }}
       >
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-          𝐋𝐨𝐠 𝐈𝐧
+          LOG IN
         </Text>
       </TouchableOpacity>
 
@@ -68,16 +68,16 @@ export default function Welcome() {
       <TouchableOpacity
         onPress={() => router.push("/signup")}
         style={{
-          borderColor: "#fff",
-          borderWidth: 2,
+          backgroundColor: "#2D8CFF",
           paddingVertical: 10,
           borderRadius: 5,
           width: "60%",
           alignItems: "center",
+          marginBottom: 15,
         }}
       >
         <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-          𝐒𝐢𝐠𝐧 𝐔𝐩
+          SIGN UP
         </Text>
       </TouchableOpacity>
     </LinearGradient>

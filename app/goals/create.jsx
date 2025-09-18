@@ -64,7 +64,7 @@ export default function CreateGoal() {
   };
 
   return (
-    <LinearGradient colors={["#3b0053", "#a8007e"]} style={styles.container}>
+    <LinearGradient colors={["#2D8CFF", "#FF2D55"]} style={styles.container}>
       <KeyboardAvoidingView
         style={styles.inner}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     marginBottom: 20,
-    backgroundColor: "#5a1a80",
+    backgroundColor: "#1E5F99",
     borderRadius: 10,
     overflow: "hidden",
   },
@@ -216,10 +216,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     alignItems: "center",
-    backgroundColor: "#5a1a80",
+    backgroundColor: "#1E5F99",
   },
   activeTab: {
-    backgroundColor: "#9d4edd",
+    backgroundColor: "#FF2D55",
   },
   tabText: {
     color: "#ccc",
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   input: {
-    backgroundColor: "#6e2ca0",
+    backgroundColor: "#4A90E2",
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderRadius: 12,
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flexDirection: "row",
-    backgroundColor: "#7d3c98",
+    backgroundColor: "#4A90E2",
     padding: 15,
     borderRadius: 12,
     marginBottom: 12,

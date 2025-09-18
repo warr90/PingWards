@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
 import { useRouter } from "expo-router";
 
 export default function Signup() {
@@ -19,9 +20,18 @@ export default function Signup() {
 
  const handleSignup = async () => {
   try {
-   await createUserWithEmailAndPassword(auth, email, password);
-alert("Signup Success", "Your account has been created!");
-router.replace("/home");  
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Add user data to Firestore
+    await setDoc(doc(db, 'users', user.uid), {
+      email: user.email,
+      uid: user.uid,
+      createdAt: new Date(),
+    });
+
+    alert("Signup Success", "Your account has been created!");
+    router.replace("/goals");
   } catch (err) {
     alert("Signup error: " + err.message);
   }
@@ -31,14 +41,14 @@ router.replace("/home");
 
   return (
     <LinearGradient
-      colors={["#2E0249", "#570A57", "#A91079"]}
+      colors={["#2D8CFF", "#FF2D55"]}
       style={styles.container}
     >
-      <Text style={styles.title}>CREATE ACOUNT</Text>
-      <Text style={styles.subtitle}>JOIN CHATWARDS TODAY! 🔗</Text>
+      <Text style={styles.title}>𝐂𝐑𝐄𝐀𝐓𝐄 𝐀𝐂𝐎𝐔𝐍𝐓</Text>
+      <Text style={styles.subtitle}> 𝐉𝐎𝐈𝐍 𝐏𝐈𝐍𝐆𝐖𝐀𝐑𝐃𝐒𝐓𝐎𝐃𝐀𝐘! 🔗</Text>
 
       <TextInput
-        placeholder="Email"
+        placeholder="Phone number/email"
         placeholderTextColor="#ddd"
         value={email}
         onChangeText={setEmail}
@@ -94,16 +104,17 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   button: {
-    backgroundColor: "#9333EA",
+    backgroundColor: "#2D8CFF",
     padding: 14,
     borderRadius: 10,
-    width: "60%",
+    width: "30%",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 20,
   },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 16,
   },
   link: {
     marginTop: 10,

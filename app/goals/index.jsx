@@ -17,7 +17,7 @@ export default function ReminderTabs() {
     motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#65007a" }}>
+    <View style={{ flex: 1, backgroundColor: "#2D8CFF" }}>
       {/* Tab bar */}
       <View style={styles.tabBar}>
         {tabs.map((tab) => (
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#3a0050",
+    backgroundColor: "#1E5F99",
     paddingVertical: 12,
   },
   tabItem: {
@@ -74,14 +74,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   selectedTab: {
-    backgroundColor: "#9b4dff",
+    backgroundColor: "#FF2D55",
   },
   tabText: {
-    color: "#d3baff",
+    color: "#FFFFFF",
     fontWeight: "600",
   },
   selectedTabText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontWeight: "700",
   },
   content: {
@@ -91,11 +91,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   contentText: {
-    color: "#eee",
+    color: "#FFFFFF",
     fontSize: 20,
   },
   motivationContainer: {
-    backgroundColor: "#aa6eff",
+    backgroundColor: "#FF2D55",
     borderRadius: 12,
     padding: 25,
   },

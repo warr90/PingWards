@@ -16,7 +16,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { GoalsContext } from "../../contexts/GoalsContexts";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 
 const tabs = ["View Reminders", "Daily Boost"];
@@ -36,7 +36,6 @@ export default function ReminderTabs() {
   const [editDate, setEditDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
 
   const { reminders, deleteReminder, fetchReminders, updateReminder } = useContext(GoalsContext);
   const router = useRouter();
@@ -46,13 +45,6 @@ export default function ReminderTabs() {
 
   useEffect(() => {
     fetchReminders();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return unsubscribe;
   }, []);
 
   const formatDate = (dateInput) => {
@@ -236,7 +228,7 @@ export default function ReminderTabs() {
               accessibilityLabel="Logout"
             >
               <Text style={styles.logoutButtonText}>
-                🚪 {currentUser?.displayName || currentUser?.email || 'User'} - Logout
+                🚪 Logout
               </Text>
             </TouchableOpacity>
           </View>

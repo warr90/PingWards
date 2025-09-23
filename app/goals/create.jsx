@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { GoalsContext } from "../../contexts/GoalsContexts";
-import { signOut, onAuthStateChanged } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { auth } from "../../firebaseConfig";
 
 
@@ -27,17 +27,9 @@ export default function CreateReminder() {
     return tomorrow;
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
 
   const { createReminder } = useContext(GoalsContext);
   const router = useRouter();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return unsubscribe;
-  }, []);
 
   const handleCreateReminder = async () => {
     if (!reminderText.trim()) {
@@ -117,7 +109,7 @@ export default function CreateReminder() {
               accessibilityLabel="Logout"
             >
               <Text style={styles.logoutButtonText}>
-                🚪 {currentUser?.displayName || currentUser?.email || 'User'} - Logout
+                🚪 Logout
               </Text>
             </TouchableOpacity>
           </View>

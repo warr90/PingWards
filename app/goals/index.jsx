@@ -16,6 +16,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { GoalsContext } from "../../contexts/GoalsContexts";
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 const tabs = ["View Reminders", "Daily Boost"];
 
@@ -34,6 +36,7 @@ export default function ReminderTabs() {
   const [editDate, setEditDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const { reminders, deleteReminder, fetchReminders, updateReminder } = useContext(GoalsContext);
   const router = useRouter();
@@ -43,6 +46,13 @@ export default function ReminderTabs() {
 
   useEffect(() => {
     fetchReminders();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
   }, []);
 
   const formatDate = (dateInput) => {
@@ -200,6 +210,17 @@ export default function ReminderTabs() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Navigation will be handled automatically by the layout component
+      // when the user state changes
+    } catch (error) {
+      console.error("Error signing out:", error);
+      Alert.alert("Error", "Failed to sign out. Please try again.");
+    }
+  };
+
   return (
     <LinearGradient colors={["#2D8CFF", "#FF2D55"]} style={styles.container}>
       <KeyboardAvoidingView
@@ -207,7 +228,18 @@ export default function ReminderTabs() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.card}>
-          <Text style={styles.heading}>My Reminders</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.heading}>My Reminders</Text>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+              accessibilityLabel="Logout"
+            >
+              <Text style={styles.logoutButtonText}>
+                🚪 {currentUser?.displayName || currentUser?.email || 'User'} - Logout
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Tab bar */}
           <View style={styles.tabBar}>
@@ -429,6 +461,25 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 30,
     textAlign: "center",
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  logoutButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
   tabBar: {
     flexDirection: "row",

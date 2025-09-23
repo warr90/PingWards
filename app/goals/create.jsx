@@ -13,6 +13,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { GoalsContext } from "../../contexts/GoalsContexts";
+import { signOut, onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 
 export default function CreateReminder() {
@@ -25,9 +27,17 @@ export default function CreateReminder() {
     return tomorrow;
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const { createReminder } = useContext(GoalsContext);
   const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
 
   const handleCreateReminder = async () => {
     if (!reminderText.trim()) {
@@ -81,6 +91,17 @@ export default function CreateReminder() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Navigation will be handled automatically by the layout component
+      // when the user state changes
+    } catch (error) {
+      console.error("Error signing out:", error);
+      Alert.alert("Error", "Failed to sign out. Please try again.");
+    }
+  };
+
   return (
     <LinearGradient colors={["#2D8CFF", "#FF2D55"]} style={styles.container}>
       <KeyboardAvoidingView
@@ -88,7 +109,18 @@ export default function CreateReminder() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.card}>
-          <Text style={styles.heading}>Create New Reminder</Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.heading}>Create New Reminder</Text>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={handleLogout}
+              accessibilityLabel="Logout"
+            >
+              <Text style={styles.logoutButtonText}>
+                🚪 {currentUser?.displayName || currentUser?.email || 'User'} - Logout
+              </Text>
+            </TouchableOpacity>
+          </View>
 
 
 
@@ -172,6 +204,25 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 10,
     textAlign: "center",
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  logoutButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
 
   dateSection: {

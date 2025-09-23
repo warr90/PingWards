@@ -22,7 +22,7 @@ export default function Layout() {
         {user ? (
           <>
             <Stack.Screen key="goals" name="goals" />
-            <Stack.Screen key="create" name="create" options={{ title: "Create Note", headerShown: true }} />
+            <Stack.Screen key="goals-create" name="goals/create" options={{ title: "Create Reminder", headerShown: true }} />
             <Stack.Screen key="edit" name="edit" options={{ title: "Edit Note", headerShown: true }} />
           </>
         ) : (

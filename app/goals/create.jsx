@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -7,60 +7,97 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  FlatList,
   Alert,
 } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { GoalsContext } from "../../contexts/GoalsContexts";
 
-export default function CreateGoal() {
-  const [goal, setGoal] = useState("");
-  const [goalsList, setGoalsList] = useState([]);
-  const [activeTab, setActiveTab] = useState("add");
+
+export default function CreateReminder() {
+  const [reminderText, setReminderText] = useState("");
   const [notificationDate, setNotificationDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pickerMode, setPickerMode] = useState("date"); // add this
 
-  const handleAddGoal = () => {
-    if (!goal.trim()) {
+  const { createReminder } = useContext(GoalsContext);
+  const router = useRouter();
+
+  const handleCreateReminder = async () => {
+    if (!reminderText.trim()) {
       Alert.alert("Validation", "Please enter a reminder.");
       return;
     }
 
-    const newGoal = {
-      text: goal.trim(),
+    const newReminder = {
+      text: reminderText.trim(),
       createdDate: new Date(),
-      notificationDate,
-      id: Date.now().toString(), 
+      notificationDate: notificationDate.toISOString(),
+      completed: false,
     };
 
-    setGoalsList((currentGoals) => [...currentGoals, newGoal]);
-    setGoal("");
-    setActiveTab("view");
-  };
+    await createReminder(newReminder);
+    setReminderText("");
 
-
-  const deleteReminder = (id) => {
-    setGoalsList((currentGoals) =>
-      currentGoals.filter((goal) => goal.id !== id)
+    // Show success message and navigate back
+    Alert.alert(
+      "Success!",
+      "Reminder created successfully!",
+      [
+        {
+          text: "Create Another",
+          onPress: () => setReminderText("")
+        },
+        {
+          text: "View Reminders",
+          onPress: () => router.push("/goals")
+        }
+      ]
     );
   };
 
-  const onChangeDate = (event, selectedDate) => {
-    setShowDatePicker(false); 
-    if (selectedDate) {
-      setNotificationDate(selectedDate);
-    }
+  const openDatePicker = () => {
+    setPickerMode("date");
+    setShowDatePicker(true);
   };
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }) + ", " + date.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const onChangeDate = (event, selectedDate) => {
+    if (Platform.OS === "android") {
+      if (pickerMode === "date") {
+        setShowDatePicker(false);
+        if (selectedDate) {
+          setNotificationDate((prev) => {
+            // Keep the time, update the date
+            const newDate = new Date(selectedDate);
+            newDate.setHours(prev.getHours());
+            newDate.setMinutes(prev.getMinutes());
+            return newDate;
+          });
+          // Now show time picker
+          setTimeout(() => {
+            setPickerMode("time");
+            setShowDatePicker(true);
+          }, 200);
+        }
+      } else if (pickerMode === "time") {
+        setShowDatePicker(false);
+        if (selectedDate) {
+          setNotificationDate((prev) => {
+            // Keep the date, update the time
+            const newDate = new Date(prev);
+            newDate.setHours(selectedDate.getHours());
+            newDate.setMinutes(selectedDate.getMinutes());
+            newDate.setSeconds(0);
+            newDate.setMilliseconds(0);
+            return newDate;
+          });
+        }
+      }
+    } else {
+      setShowDatePicker(false);
+      if (selectedDate) setNotificationDate(selectedDate);
+    }
   };
 
   return (
@@ -70,113 +107,62 @@ export default function CreateGoal() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <View style={styles.card}>
-          <Text style={styles.heading}>Create a Reminder</Text>
+          <Text style={styles.heading}>Create New Reminder</Text>
 
-          {/* Tabs */}
-          <View style={styles.tabContainer}>
+
+
+          <TextInput
+            placeholder="What would you like to be reminded about?"
+            placeholderTextColor="#ccc"
+            style={styles.input}
+            value={reminderText}
+            onChangeText={setReminderText}
+            returnKeyType="done"
+            onSubmitEditing={handleCreateReminder}
+            multiline={true}
+          />
+
+          {/* Date Selection Section */}
+          <View style={styles.dateSection}>
+            <Text style={styles.dateSectionTitle}>🔔 When do you want to be reminded?</Text>
+            <Text style={styles.dateSectionSubtitle}>
+              Choose any date and time for your reminder
+            </Text>
             <TouchableOpacity
-              style={[styles.tab, activeTab === "add" && styles.activeTab]}
-              onPress={() => setActiveTab("add")}
+              style={styles.datePickerButton}
+              onPress={openDatePicker}
             >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === "add" && styles.activeTabText,
-                ]}
-              >
-                Add Reminder
+              <Text style={styles.datePickerButtonText}>
+                📅 {notificationDate.toLocaleDateString()} at {notificationDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+              </Text>
+              <Text style={styles.datePickerSubText}>
+                Tap to change date and time
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.tab, activeTab === "view" && styles.activeTab]}
-              onPress={() => setActiveTab("view")}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === "view" && styles.activeTabText,
-                ]}
-              >
-                View Reminders
-              </Text>
-            </TouchableOpacity>
           </View>
 
-          {/* Add Reminder */}
-          {activeTab === "add" && (
-            <>
-              <TextInput
-                placeholder="What to remind you?"
-                placeholderTextColor="#ccc"
-                style={styles.input}
-                value={goal}
-                onChangeText={setGoal}
-                returnKeyType="done"
-                onSubmitEditing={handleAddGoal}
-              />
-
-              <TouchableOpacity
-                style={styles.datePickerButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={styles.datePickerButtonText}>
-                  📅 Notification Date:
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={notificationDate}
-                  mode="datetime"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={onChangeDate}
-                  minimumDate={new Date()}
-                />
-              )}
-
-              <TouchableOpacity style={styles.button} onPress={handleAddGoal}>
-                <Text style={styles.buttonText}>Add New Reminder</Text>
-              </TouchableOpacity>
-            </>
+          {showDatePicker && (
+            <DateTimePicker
+              value={notificationDate}
+              mode={pickerMode}
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onChangeDate}
+            />
           )}
 
-          {/* View Reminders */}
-          {activeTab === "view" && (
-            <View style={styles.listContainer}>
-              {goalsList.length === 0 ? (
-                <Text style={styles.noReminders}>No reminders yet.</Text>
-              ) : (
-                <>
-                  <Text style={styles.listHeading}>Your Reminders:</Text>
-                  <FlatList
-                    data={goalsList}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <View style={styles.listItem}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.listItemText}>{item.text}</Text>
-                          <Text style={styles.dateText}>
-                            Created: {formatDate(new Date(item.createdDate))}
-                          </Text>
-                          <Text style={styles.dateText}>
-                            Notify on: {formatDate(new Date(item.notificationDate))}
-                          </Text>
-                        </View>
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => deleteReminder(item.id)}
-                          accessibilityLabel={`Delete reminder: ${item.text}`}
-                        >
-                          <Text style={styles.deleteButtonText}>×</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  />
-                </>
-              )}
-            </View>
-          )}
+          <TouchableOpacity style={styles.button} onPress={handleCreateReminder}>
+            <Text style={styles.buttonText}>Create Reminder</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => router.push("/goals")}
+          >
+            <Text style={styles.secondaryButtonText}>View All Reminders</Text>
+          </TouchableOpacity>
+
+
         </View>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -202,111 +188,87 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 30,
+    marginBottom: 10,
     textAlign: "center",
   },
-  tabContainer: {
-    flexDirection: "row",
+
+  dateSection: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 12,
+    padding: 15,
     marginBottom: 20,
-    backgroundColor: "#1E5F99",
-    borderRadius: 10,
-    overflow: "hidden",
+    borderLeftWidth: 4,
+    borderLeftColor: "#FF2D55",
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 14,
-    alignItems: "center",
-    backgroundColor: "#1E5F99",
-  },
-  activeTab: {
-    backgroundColor: "#FF2D55",
-  },
-  tabText: {
-    color: "#ccc",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  activeTabText: {
+  dateSectionTitle: {
     color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
   },
+  dateSectionSubtitle: {
+    color: "#ccc",
+    fontSize: 14,
+    marginBottom: 15,
+    textAlign: "center",
+  },
+
   input: {
-    backgroundColor: "#4A90E2",
+    backgroundColor: "rgba(255,255,255,0.1)",
     paddingHorizontal: 20,
     paddingVertical: 15,
     borderRadius: 12,
     fontSize: 18,
     color: "#fff",
     marginBottom: 20,
+    minHeight: 100,
+    textAlignVertical: "top",
   },
   datePickerButton: {
-    backgroundColor: "#8e44ad",
+    backgroundColor: "#FF2D55",
     paddingVertical: 15,
     borderRadius: 12,
     marginBottom: 20,
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   datePickerButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
   },
+  datePickerSubText: {
+    color: "#fff",
+    fontSize: 12,
+    marginTop: 4,
+    opacity: 0.8,
+  },
   button: {
-    backgroundColor: "#9d4edd",
+    backgroundColor: "#2D8CFF",
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: "center",
-    marginBottom: 25,
+    marginBottom: 15,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
-  listContainer: {
-    marginTop: 10,
-  },
-  listHeading: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 20,
-    marginBottom: 15,
-  },
-  listItem: {
-    flexDirection: "row",
-    backgroundColor: "#4A90E2",
-    padding: 15,
+  secondaryButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#fff",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     borderRadius: 12,
-    marginBottom: 12,
     alignItems: "center",
-    justifyContent: "space-between",
   },
-  listItemText: {
+  secondaryButtonText: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  dateText: {
-    color: "#d1c4e9",
-    fontSize: 14,
-  },
-  deleteButton: {
-    backgroundColor: "#e74c3c",
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginLeft: 15,
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 18,
-    lineHeight: 18,
-  },
-  noReminders: {
-    color: "#ccc",
     fontSize: 16,
-    fontStyle: "italic",
-    textAlign: "center",
+    fontWeight: "600",
   },
+
 });

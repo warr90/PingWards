@@ -12,30 +12,35 @@ export default function Login() {
   const router = useRouter();
 
   const handleLogin = async () => {
-  try {
-    if (!email || !email.includes("@")) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-    if (!password) {
-      alert("Please enter your password.");
-      return;
-    }
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    try {
+      console.log("Attempting login with email:", email);
+      if (!email || !email.includes("@")) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+      if (!password) {
+        alert("Please enter your password.");
+        return;
+      }
 
-    // Store or update user data in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
-      email: user.email,
-      uid: user.uid,
-      lastLogin: new Date(),
-    }, { merge: true });
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("Login successful for user:", user.email);
 
-    router.push("/goals");
-  } catch (err) {
-    alert("Login error: " + err.message);
-  }
-};
+      // Store or update user data in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        uid: user.uid,
+        lastLogin: new Date(),
+      }, { merge: true });
+
+      console.log("User data stored in Firestore, navigating to goals");
+      router.push("/goals");
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Login error: " + err.message);
+    }
+  };
 
 
 

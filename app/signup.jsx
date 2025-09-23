@@ -20,8 +20,10 @@ export default function Signup() {
 
  const handleSignup = async () => {
   try {
+    console.log("Attempting signup with email:", email);
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log("Signup successful for user:", user.email);
 
     // Add user data to Firestore
     await setDoc(doc(db, 'users', user.uid), {
@@ -30,9 +32,11 @@ export default function Signup() {
       createdAt: new Date(),
     });
 
+    console.log("User data stored in Firestore, navigating to goals");
     alert("Signup Success", "Your account has been created!");
     router.replace("/goals");
   } catch (err) {
+    console.error("Signup error:", err);
     alert("Signup error: " + err.message);
   }
 };

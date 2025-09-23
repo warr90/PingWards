@@ -17,9 +17,14 @@ import { GoalsContext } from "../../contexts/GoalsContexts";
 
 export default function CreateReminder() {
   const [reminderText, setReminderText] = useState("");
-  const [notificationDate, setNotificationDate] = useState(new Date());
+  const [notificationDate, setNotificationDate] = useState(() => {
+    // Set default to tomorrow (no specific time)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0); // Set to midnight
+    return tomorrow;
+  });
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [pickerMode, setPickerMode] = useState("date"); // add this
 
   const { createReminder } = useContext(GoalsContext);
   const router = useRouter();
@@ -32,7 +37,7 @@ export default function CreateReminder() {
 
     const newReminder = {
       text: reminderText.trim(),
-      createdDate: new Date(),
+      createdDate: new Date().toISOString(), // Store as ISO string for Firebase compatibility
       notificationDate: notificationDate.toISOString(),
       completed: false,
     };
@@ -58,45 +63,21 @@ export default function CreateReminder() {
   };
 
   const openDatePicker = () => {
-    setPickerMode("date");
     setShowDatePicker(true);
   };
 
   const onChangeDate = (event, selectedDate) => {
     if (Platform.OS === "android") {
-      if (pickerMode === "date") {
-        setShowDatePicker(false);
-        if (selectedDate) {
-          setNotificationDate((prev) => {
-            // Keep the time, update the date
-            const newDate = new Date(selectedDate);
-            newDate.setHours(prev.getHours());
-            newDate.setMinutes(prev.getMinutes());
-            return newDate;
-          });
-          // Now show time picker
-          setTimeout(() => {
-            setPickerMode("time");
-            setShowDatePicker(true);
-          }, 200);
-        }
-      } else if (pickerMode === "time") {
-        setShowDatePicker(false);
-        if (selectedDate) {
-          setNotificationDate((prev) => {
-            // Keep the date, update the time
-            const newDate = new Date(prev);
-            newDate.setHours(selectedDate.getHours());
-            newDate.setMinutes(selectedDate.getMinutes());
-            newDate.setSeconds(0);
-            newDate.setMilliseconds(0);
-            return newDate;
-          });
-        }
-      }
-    } else {
       setShowDatePicker(false);
-      if (selectedDate) setNotificationDate(selectedDate);
+    }
+
+    if (event.type === 'set' && selectedDate) {
+      // Only set the date, keep time as midnight
+      const newDate = new Date(selectedDate);
+      newDate.setHours(0, 0, 0, 0);
+      setNotificationDate(newDate);
+    } else if (event.type === 'dismissed') {
+      setShowDatePicker(false);
     }
   };
 
@@ -126,17 +107,17 @@ export default function CreateReminder() {
           <View style={styles.dateSection}>
             <Text style={styles.dateSectionTitle}>🔔 When do you want to be reminded?</Text>
             <Text style={styles.dateSectionSubtitle}>
-              Choose any date and time for your reminder
+              Choose any date for your reminder
             </Text>
             <TouchableOpacity
               style={styles.datePickerButton}
               onPress={openDatePicker}
             >
               <Text style={styles.datePickerButtonText}>
-                📅 {notificationDate.toLocaleDateString()} at {notificationDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                📅 {notificationDate.toLocaleDateString()}
               </Text>
               <Text style={styles.datePickerSubText}>
-                Tap to change date and time
+                Tap to change date
               </Text>
             </TouchableOpacity>
 
@@ -145,9 +126,10 @@ export default function CreateReminder() {
           {showDatePicker && (
             <DateTimePicker
               value={notificationDate}
-              mode={pickerMode}
+              mode="date"
               display={Platform.OS === "ios" ? "spinner" : "default"}
               onChange={onChangeDate}
+              minimumDate={new Date()} // Prevent selecting past dates
             />
           )}
 

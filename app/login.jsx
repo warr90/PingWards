@@ -49,8 +49,57 @@ export default function Login() {
       colors={["#2D8CFF", "#FF2D55"]}
       style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}
     >
+      {/* App Branding */}
+      <View style={{ alignItems: "center", marginBottom: 50 }}>
+        {/* App Name and Icon Row */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", marginBottom: 15 }}>
+          {/* Reminder Icon */}
+          <Text style={{
+            fontSize: 24,
+            color: "#FFD700",
+            marginRight: 6,
+            textShadowColor: '#FF6B35',
+            textShadowOffset: { width: 0, height: 0 },
+            textShadowRadius: 8,
+            textAlign: "center",
+          }}>
+            🔔
+          </Text>
+
+          {/* App Name with Enhanced Styling */}
+          <Text style={{
+            fontSize: 44,
+            color: "#FFF",
+            fontWeight: "900",
+            textAlign: "center",
+            textShadowColor: '#4A90E2',
+            textShadowOffset: { width: 0, height: 0 },
+            textShadowRadius: 15,
+            letterSpacing: 2,
+          }}>
+            𝐏𝐢𝐧𝐠𝐖𝐚𝐫𝐝𝐬
+          </Text>
+        </View>
+
+        {/* Tagline with Enhanced Styling */}
+        <Text style={{
+          fontSize: 16,
+          color: "#fff",
+          textAlign: "center",
+          fontStyle: "italic",
+          opacity: 0.95,
+          lineHeight: 24,
+          fontWeight: "500",
+          textShadowColor: 'rgba(0, 0, 0, 0.3)',
+          textShadowOffset: { width: 1, height: 1 },
+          textShadowRadius: 5,
+        }}>
+          "𝑆𝑚𝑎𝑟𝑡 𝑟𝑒𝑚𝑖𝑛𝑑𝑒𝑟𝑠. 𝑆𝑒𝑎𝑚𝑙𝑒𝑠𝑠 𝑠𝑢𝑝𝑝𝑜𝑟𝑡. 𝑇𝑖𝑚𝑒 𝑤𝑒𝑙𝑙 𝑠𝑝𝑒𝑛𝑡."
+        </Text>
+      </View>
+
       <Text style={{ fontSize: 28, color: "#fff", fontWeight: "bold", marginBottom: 30 }}>
-      𝐋𝐎𝐆 𝐈𝐍
+        𝐋𝐎𝐆 𝐈𝐍
       </Text>
 
       <TextInput

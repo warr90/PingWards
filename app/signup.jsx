@@ -48,7 +48,7 @@ export default function Signup() {
       colors={["#2D8CFF", "#FF2D55"]}
       style={styles.container}
     >
-      <Text style={styles.title}>𝐂𝐑𝐄𝐀𝐓𝐄 𝐀𝐂𝐎𝐔𝐍𝐓</Text>
+      <Text style={styles.title}>𝐂𝐑𝐄𝐀𝐓𝐄 𝐀𝐂𝐎𝐔𝐍𝐓 </Text>
       <Text style={styles.subtitle}> 𝐉𝐎𝐈𝐍 𝐏𝐈𝐍𝐆𝐖𝐀𝐑𝐃𝐒𝐓𝐎𝐃𝐀𝐘! 🔗</Text>
 
       <TextInput

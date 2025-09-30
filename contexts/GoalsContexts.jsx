@@ -1,6 +1,7 @@
 import { addDoc, collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore"
 import { createContext, useState } from "react"
 import { db } from "../firebaseConfig.js"
+import { scheduleReminderNotification, cancelReminderNotification } from "../utils/notifications"
 
 export const GoalsContext = createContext()
 
@@ -66,7 +67,20 @@ export function GoalsProvider({ children }) {
   async function createReminder(reminderData) {
     try {
       console.log("Creating reminder:", reminderData)
-      await addDoc(collection(db, 'reminders'), reminderData)
+      // Ensure default values for new fields
+      const enhancedData = {
+        ...reminderData,
+        tags: reminderData.tags || [],
+        category: reminderData.category || 'General',
+        priority: reminderData.priority || 'Medium',
+        completed: reminderData.completed || false,
+      }
+      const docRef = await addDoc(collection(db, 'reminders'), enhancedData)
+      // Schedule notification
+      const notificationId = await scheduleReminderNotification(enhancedData)
+      if (notificationId) {
+        await updateDoc(doc(db, 'reminders', docRef.id), { notificationId })
+      }
       await fetchReminders() // Refresh reminders after creating
     } catch (error) {
       console.error("Error creating reminder:", error)
@@ -75,6 +89,11 @@ export function GoalsProvider({ children }) {
 
   async function deleteReminder(reminderId) {
     try {
+      // Cancel notification before deleting
+      const reminder = reminders.find(r => r.id === reminderId)
+      if (reminder?.notificationId) {
+        await cancelReminderNotification(reminder.notificationId)
+      }
       await deleteDoc(doc(db, 'reminders', reminderId))
       await fetchReminders() // Refresh reminders after deleting
     } catch (error) {
@@ -84,7 +103,17 @@ export function GoalsProvider({ children }) {
 
   async function updateReminder(reminderId, updatedData) {
     try {
+      // Cancel old notification if exists
+      const reminder = reminders.find(r => r.id === reminderId)
+      if (reminder?.notificationId) {
+        await cancelReminderNotification(reminder.notificationId)
+      }
       await updateDoc(doc(db, 'reminders', reminderId), updatedData)
+      // Schedule new notification
+      const notificationId = await scheduleReminderNotification(updatedData)
+      if (notificationId) {
+        await updateDoc(doc(db, 'reminders', reminderId), { notificationId })
+      }
       await fetchReminders() // Refresh reminders after updating
     } catch (error) {
       console.error("Error updating reminder:", error)

@@ -8,14 +8,21 @@ import {
   StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import { useRouter } from "expo-router";
 
 export default function Signup() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [gender, setGender] = useState("");
+  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+  const [locale, setLocale] = useState(Intl.DateTimeFormat().resolvedOptions().locale || "en-US");
   const router = useRouter();
 
  const handleSignup = async () => {
@@ -25,19 +32,35 @@ export default function Signup() {
     const user = userCredential.user;
     console.log("Signup successful for user:", user.email);
 
+    // Update profile with display name
+    await updateProfile(user, { displayName: name });
+
     // Add user data to Firestore
     await setDoc(doc(db, 'users', user.uid), {
+      displayName: name,
       email: user.email,
+      username: username,
+      phoneNumber: phoneNumber,
+      dateOfBirth: dateOfBirth,
+      gender: gender,
       uid: user.uid,
+      timezone: timezone,
+      locale: locale,
+      preferences: {
+        theme: "light",
+        notifications: true,
+        defaultView: "list",
+      },
+      avatarUrl: "",
       createdAt: new Date(),
     });
 
     console.log("User data stored in Firestore, navigating to goals");
-    alert("Signup Success", "Your account has been created!");
+    Alert.alert("Signup Success", "Your account has been created!");
     router.replace("/goals");
   } catch (err) {
     console.error("Signup error:", err);
-    alert("Signup error: " + err.message);
+    Alert.alert("Signup Error", err.message);
   }
 };
 
@@ -52,7 +75,15 @@ export default function Signup() {
       <Text style={styles.subtitle}> 𝐉𝐎𝐈𝐍 𝐏𝐈𝐍𝐆𝐖𝐀𝐑𝐃𝐒𝐓𝐎𝐃𝐀𝐘! 🔗</Text>
 
       <TextInput
-        placeholder="Phone number/email"
+        placeholder="Name"
+        placeholderTextColor="#ddd"
+        value={name}
+        onChangeText={setName}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Email"
         placeholderTextColor="#ddd"
         value={email}
         onChangeText={setEmail}
